@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Classifier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">VisionLabel</div>
+          <div class="brand-sub">Image Classifier</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-label">Model</div>
+        <div class="model-card">
+          <div class="model-name">MobileNetV2</div>
+          <div class="model-meta">ImageNet · 1000 classes</div>
+          <div class="model-badge {% if torch_available %}badge-ok{% else %}badge-warn{% endif %}">
+            {% if torch_available %}● Ready{% else %}⚠ PyTorch not installed{% endif %}
+          </div>
+        </div>
+
+        <div class="nav-label" style="margin-top:28px">How it works</div>
+        <div class="how-steps">
+          <div class="step"><span class="step-num">1</span><span>Upload any photo</span></div>
+          <div class="step"><span class="step-num">2</span><span>MobileNetV2 analyses it</span></div>
+          <div class="step"><span class="step-num">3</span><span>See top 5 predictions</span></div>
+        </div>
+
+        <div class="nav-label" style="margin-top:28px">Supported formats</div>
+        <div class="formats">
+          <span class="fmt-chip">JPG</span>
+          <span class="fmt-chip">PNG</span>
+          <span class="fmt-chip">WebP</span>
+          <span class="fmt-chip">BMP</span>
+          <span class="fmt-chip">GIF</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="https://github.com/pytorch/vision" target="_blank" rel="noopener" class="footer-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.38 7.86 10.9.57.1.78-.25.78-.55v-2.16c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.19a11.1 11.1 0 0 1 2.9-.39c.98 0 1.97.13 2.9.39 2.2-1.5 3.17-1.19 3.17-1.19.64 1.59.24 2.76.12 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.7 5.4-5.27 5.68.42.36.79 1.06.79 2.14v3.17c0 .3.2.66.79.55A11.51 11.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+          PyTorch / torchvision
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <h1 class="page-title">Classify an Image</h1>
+        <p class="page-sub">Upload a photo and the model will identify what's in it</p>
+      </header>
+
+      {% if not torch_available %}
+      <div class="alert alert-warn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>
+          <strong>PyTorch not installed.</strong> Run <code>pip install torch torchvision</code> to enable classification.
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="workspace">
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-inner" id="uploadInner">
+            <div class="upload-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+            </div>
+            <p class="upload-title">Drop an image here</p>
+            <p class="upload-hint">or click to browse files</p>
+            <button class="browse-btn" id="browseBtn">Choose Image</button>
+            <input type="file" id="fileInput" accept="image/*" hidden />
+          </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="results-panel" id="resultsPanel" style="display:none">
+
+          <!-- Image Preview -->
+          <div class="preview-wrap">
+            <img id="previewImg" class="preview-img" src="" alt="Uploaded image" />
+            <div class="preview-meta" id="previewMeta"></div>
+          </div>
+
+          <!-- Predictions -->
+          <div class="predictions-wrap">
+            <div class="pred-header">
+              <span class="pred-title">Predictions</span>
+              <button class="reset-btn" id="resetBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.43"/></svg>
+                Try another
+              </button>
+            </div>
+            <div id="predList" class="pred-list"></div>
+          </div>
+
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState" style="display:none">
+          <div class="spinner"></div>
+          <p>Analysing image…</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="error-state" id="errorState" style="display:none">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p id="errorMsg">Something went wrong.</p>
+          <button class="reset-btn" id="errorResetBtn">Try again</button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
